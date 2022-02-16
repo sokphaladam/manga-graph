@@ -38,10 +38,13 @@ async function MangaList(
   });
 
   return (res.data as any[]).map((item) => {
+    const cover = item.relationships.find((f: any) => f.type === "cover_art");
     return {
       ...item.attributes,
       id: item.id,
       tags: () => mapTags(item.attributes.tags),
+      relationships: item.relationships,
+      coverImage: `${ctx.upload}covers/${item.id}/${cover.attributes.fileName}`,
     };
   });
 }
@@ -60,9 +63,15 @@ async function MangaDetail(_: any, { id }: { id: string }, ctx: ContextType) {
     query: "translatedLanguage[]=en",
   });
 
+  const cover = manga.data.relationships.find(
+    (f: any) => f.type === "cover_art"
+  );
+
   return {
     ...manga.data.attributes,
     id: manga.data.id,
+    relationships: manga.data.relationships,
+    coverImage: `${ctx.upload}covers/${manga.data.id}/${cover.attributes.fileName}`,
     tags: () => mapTags(manga.data.attributes.tags),
     volumes: () => mapVolumes(aggregate.volumes),
   };

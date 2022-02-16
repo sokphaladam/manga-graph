@@ -27,6 +27,8 @@ type Manga {
   version: Int
   tags: [Tag]
   volumes: [Volume]
+  relationships: JSON
+  coverImage: String
 }
 
 type Volume {

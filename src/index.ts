@@ -7,6 +7,7 @@ import { loadSchema } from "./resolver/SchemaLoader";
 function contextType(): ContextType {
   return {
     url: DATATYPE.URL,
+    upload: DATATYPE.UPLOAD,
   };
 }
 
