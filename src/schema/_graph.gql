@@ -1,0 +1,50 @@
+scalar JSON
+scalar JSONObject
+
+type Query {
+  mangaList(limit: Int = 10, offset: Int = 0): [Manga]
+  mangaDetail(id: String!): Manga
+  mangaChapter(id: String!): Chapter
+}
+
+type Manga {
+  id: String
+  title: JSON
+  altTitles: JSON
+  isLocked: Boolean
+  links: JSON
+  originalLanguage: String
+  lastVolume: String
+  lastChapter: String
+  publicationDemographic: String
+  status: String
+  year: Int
+  contentRating: String
+  state: String
+  chapterNumbersResetOnNewVolume: Boolean
+  createdAt: String
+  updatedAt: String
+  version: Int
+  tags: [Tag]
+  volumes: [Volume]
+}
+
+type Volume {
+  volume: String
+  count: Int
+  chapters: [Chapter]
+}
+
+type Chapter {
+  chapter: String
+  id: String
+  count: Int
+  images: [String]
+}
+
+type Tag {
+  id: String
+  name: JSON
+  group: String
+  version: Int
+}
