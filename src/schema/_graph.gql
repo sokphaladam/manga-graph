@@ -2,14 +2,15 @@ scalar JSON
 scalar JSONObject
 
 type Query {
-  mangaList(limit: Int = 10, offset: Int = 0): [Manga]
-  mangaDetail(id: String!): Manga
-  mangaChapter(id: String!): Chapter
+  mangaList(limit: Int = 10, offset: Int = 0, pornographic: Boolean): [Manga]
+  mangaDetail(id: String!, limit: Int = 25, offset: Int = 0): Manga
+  mangaChapter(id: String!): Volume
 }
 
 type Manga {
   id: String
   title: JSON
+  description: JSON
   altTitles: JSON
   isLocked: Boolean
   links: JSON
@@ -29,19 +30,24 @@ type Manga {
   volumes: [Volume]
   relationships: JSON
   coverImage: String
+  totalVolumes: Int
 }
 
 type Volume {
-  volume: String
-  count: Int
-  chapters: [Chapter]
-}
-
-type Chapter {
-  chapter: String
   id: String
-  count: Int
+  volume: String
+  chapter: String
+  title: String
+  translatedLanguage: String
+  publishAt: String
+  readableAt: String
+  createdAt: String
+  updatedAt: String
+  pages: Int
+  relationships: JSON
   images: [String]
+  externalUrl: String
+  nextChapter: String
 }
 
 type Tag {

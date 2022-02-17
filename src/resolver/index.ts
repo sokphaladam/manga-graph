@@ -12,29 +12,31 @@ function mapTags(tags: any[]) {
 }
 
 function mapVolumes(volumes: any[]) {
-  return Object.keys(volumes).map((key: any) => {
+  return volumes.map((x) => {
     return {
-      ...volumes[key],
-      chapters: Object.keys(volumes[key].chapters).map((x) => {
-        return volumes[key].chapters[x];
-      }),
+      id: x.id,
+      ...x.attributes,
+      relationships: x.relationships,
     };
   });
 }
 
 async function MangaList(
   _: any,
-  { limit, offset }: { limit: number; offset: number },
+  {
+    limit,
+    offset,
+    pornographic,
+  }: { limit: number; offset: number; pornographic: boolean },
   ctx: ContextType
 ) {
   const res: any = await getRequest({
     path: "manga/",
-    query:
-      "limit=" +
-      limit +
-      "&offset=" +
-      offset +
-      "&includes[]=cover_art&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica",
+    query: `limit=${limit}&offset=${offset}&includes[]=cover_art${
+      pornographic
+        ? "&contentRating[]=pornographic"
+        : "&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica"
+    }`,
   });
 
   return (res.data as any[]).map((item) => {
@@ -49,7 +51,11 @@ async function MangaList(
   });
 }
 
-async function MangaDetail(_: any, { id }: { id: string }, ctx: ContextType) {
+async function MangaDetail(
+  _: any,
+  { id, limit, offset }: { id: string; limit: number; offset: number },
+  ctx: ContextType
+) {
   const manga = await getRequest({
     path: "manga/",
     query:
@@ -57,10 +63,10 @@ async function MangaDetail(_: any, { id }: { id: string }, ctx: ContextType) {
     id,
   });
 
-  const aggregate = await getRequest({
+  const feed = await getRequest({
     path: "manga/",
-    id: id + "/aggregate",
-    query: "translatedLanguage[]=en",
+    id: id + "/feed",
+    query: `limit=${limit}&includes[]=scanlation_group&includes[]=user&order[volume]=asc&order[chapter]=asc&offset=${offset}&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic&translatedLanguage[]=en`,
   });
 
   const cover = manga.data.relationships.find(
@@ -73,25 +79,40 @@ async function MangaDetail(_: any, { id }: { id: string }, ctx: ContextType) {
     relationships: manga.data.relationships,
     coverImage: `${ctx.upload}covers/${manga.data.id}/${cover.attributes.fileName}`,
     tags: () => mapTags(manga.data.attributes.tags),
-    volumes: () => mapVolumes(aggregate.volumes),
+    volumes: () => mapVolumes(feed.data),
+    totalVolumes: feed.total,
   };
 }
 
 async function MangaChapter(_: any, { id }: { id: string }, ctx: ContextType) {
-  const { data } = await getRequest({ path: "chapter/", id, query: "" });
+  const { data } = await getRequest({
+    path: "chapter/",
+    id,
+    query: "includes[]=manga",
+  });
   const { chapter, baseUrl } = await getRequest({
     path: "at-home/server/",
     id,
     query: "",
   });
 
+  const manga = data.relationships.find((x: any) => x.type === "manga");
+  const feed = await getRequest({
+    path: "manga/",
+    id: manga.id + "/feed",
+    query: `includes[]=scanlation_group&includes[]=user&order[volume]=asc&order[chapter]=asc&offset=0&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic&translatedLanguage[]=en`,
+  });
+  const volumes = mapVolumes(feed.data).filter((x) => x.pages > 0);
+  const next = volumes.findIndex((x) => x.id === id);
+
   return {
     id: data.id,
-    chapter: data.attributes.chapter,
-    count: data.attributes.pages,
+    ...data.attributes,
     images: chapter.dataSaver.map((x: any) => {
       return `${baseUrl}/data-saver/${chapter.hash}/${x}`;
     }),
+    relationships: data.relationships,
+    nextChapter: volumes[next + 1] ? volumes[next + 1].id : null,
   };
 }
 
