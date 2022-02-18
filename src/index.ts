@@ -1,10 +1,9 @@
 import { ApolloServer, gql } from "apollo-server";
-import { ContextType } from "./lib/ContextType";
 import { DATATYPE } from "./lib/Datatype";
 import { RESOLVER } from "./resolver";
 import { loadSchema } from "./resolver/SchemaLoader";
 
-function contextType(): ContextType {
+const contextType = () => {
   return {
     url: DATATYPE.URL,
     upload: DATATYPE.UPLOAD,

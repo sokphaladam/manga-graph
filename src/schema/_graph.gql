@@ -2,9 +2,10 @@ scalar JSON
 scalar JSONObject
 
 type Query {
-  mangaList(limit: Int = 10, offset: Int = 0, pornographic: Boolean): [Manga]
+  mangaList(limit: Int = 10, offset: Int = 0, pornographic: Boolean, search: String): [Manga]
   mangaDetail(id: String!, limit: Int = 25, offset: Int = 0): Manga
   mangaChapter(id: String!): Volume
+  mangaSearch(search: String): JSON
 }
 
 type Manga {

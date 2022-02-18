@@ -2,7 +2,7 @@ import request, { Options } from "request";
 import { DATATYPE } from "../lib/Datatype";
 
 interface requestProp {
-  path: "manga/" | "at-home/server/" | "chapter/";
+  path: "manga/" | "at-home/server/" | "chapter/" | "author/";
   query: string;
   id?: string;
 }

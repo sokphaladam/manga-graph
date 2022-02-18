@@ -1,6 +1,8 @@
 import { ContextType } from "../lib/ContextType";
 import GraphQLJSON, { GraphQLJSONObject } from "graphql-type-json";
 import { getRequest } from "../service/request";
+import { MangaList } from "./manga/MangaList";
+import { MangaSearch } from "./manga/MangaSearch";
 
 function mapTags(tags: any[]) {
   return tags.map((tag: any) => {
@@ -17,36 +19,6 @@ function mapVolumes(volumes: any[]) {
       id: x.id,
       ...x.attributes,
       relationships: x.relationships,
-    };
-  });
-}
-
-async function MangaList(
-  _: any,
-  {
-    limit,
-    offset,
-    pornographic,
-  }: { limit: number; offset: number; pornographic: boolean },
-  ctx: ContextType
-) {
-  const res: any = await getRequest({
-    path: "manga/",
-    query: `limit=${limit}&offset=${offset}&includes[]=cover_art${
-      pornographic
-        ? "&contentRating[]=pornographic"
-        : "&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica"
-    }`,
-  });
-
-  return (res.data as any[]).map((item) => {
-    const cover = item.relationships.find((f: any) => f.type === "cover_art");
-    return {
-      ...item.attributes,
-      id: item.id,
-      tags: () => mapTags(item.attributes.tags),
-      relationships: item.relationships,
-      coverImage: `${ctx.upload}covers/${item.id}/${cover.attributes.fileName}`,
     };
   });
 }
@@ -123,5 +95,6 @@ export const RESOLVER = {
     mangaList: MangaList,
     mangaDetail: MangaDetail,
     mangaChapter: MangaChapter,
+    mangaSearch: MangaSearch
   },
 };
